@@ -1,0 +1,18 @@
+AI Use Documentation
+AirAsia Rewards Redemption System - HW2
+1. AI Tool Used:
+ChatGPT and Gemini
+2. Prompts Used:
+- Help me create a gift card details page.
+- Help me create forms to add and update gift cards.
+- Help me style the website using CSS.
+3. How AI Supported My Work:
+ChatGPT assisted me with creating HTML page structures,
+writing CSS styling, organizing files, and connecting
+I used GitHub Codespaces to create and organize the
+website files.
+4. Example of an AI Suggestion Tested or Changed:
+ChatGPT suggested using an external CSS file to keep
+the website styling consistent across all five pages.
+I applied this suggestion by creating styles.css
+inside the css folder and linking it to each page.
