@@ -1,3 +1,66 @@
+
+<?php
+require_once __DIR__ . '/includes/db.php';
+
+$cardId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+
+if (!$cardId || $cardId < 1) {
+    http_response_code(400);
+    exit('Invalid gift card ID.');
+}
+
+$stmt = $pdo->prepare(
+    "SELECT * FROM GIFTCARD WHERE card_id = ?"
+);
+$stmt->execute([$cardId]);
+$card = $stmt->fetch();
+
+if (!$card) {
+    http_response_code(404);
+    exit('Gift card not found.');
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = trim($_POST['card-name'] ?? '');
+    $type = $_POST['card-type'] ?? '';
+    $value = $_POST['card-value'] ?? '';
+    $points = $_POST['points'] ?? '';
+
+    if (
+        $name === '' ||
+        !in_array($type, ['Digital', 'Physical'], true) ||
+        !is_numeric($value) ||
+        (float)$value < 1 ||
+        !filter_var($points, FILTER_VALIDATE_INT) ||
+        (int)$points < 1
+    ) {
+        http_response_code(400);
+        exit('Invalid gift card information.');
+    }
+
+    $stmt = $pdo->prepare(
+        "UPDATE GIFTCARD
+         SET card_name = ?,
+             card_type = ?,
+             card_value = ?,
+             points_required = ?
+         WHERE card_id = ?"
+    );
+
+    $stmt->execute([
+        $name,
+        $type,
+        $value,
+        (int)$points,
+        $cardId
+    ]);
+
+    header('Location: card-details.php?id=' . $cardId);
+    exit;
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,21 +82,22 @@
     <h2>Update Gift Card</h2>
     <p>Edit the existing gift card information below.</p>
     <section class="form-container">
-        <form action="card-list.php" method="get">
+        
+<form action="card-update.php?id=<?= (int)$card['card_id'] ?>" method="post">
             <label for="card-name">Card Name</label>
               <input
                 type="text"
                 id="card-name"
-                 name="card-name"
-                   value="Amazon Gift Card"
+                 name="card-name"      
+value="<?= htmlspecialchars($card['card_name']) ?>"
                 required
             >
             <label for="card-type">Card Type</label>
             <select id="card-type" name="card-type" required>
-                <option value="Digital" selected>
+<option value="Digital" <?= $card['card_type'] === 'Digital' ? 'selected' : '' ?>>
                     Digital Gift Card
                 </option>
-                <option value="Physical">
+<option value="Physical" <?= $card['card_type'] === 'Physical' ? 'selected' : '' ?>>
                     Physical Gift Card
                   </option>
             </select>
@@ -42,7 +106,7 @@
                 type="number"
                  id="card-value"
                 name="card-value"
-                value="50.00"
+value="<?= htmlspecialchars($card['card_value']) ?>"
                 min="1"
                 step="0.01"
                 required
@@ -52,12 +116,12 @@
                 type="number"
                 id="points"
                 name="points"
-                value="5000"
+value="<?= (int)$card['points_required'] ?>"
                 min="1"
                 required
             >
             <button type="submit">Update Gift Card</button>
-            <a href="card-details.php" class="cancel-button">
+<a href="card-details.php?id=<?= (int)$card['card_id'] ?>" class="cancel-button">
                 Cancel
             </a>
         </form>
