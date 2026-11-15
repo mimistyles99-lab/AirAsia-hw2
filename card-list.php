@@ -1,3 +1,10 @@
+
+<?php
+require_once __DIR__ . '/includes/db.php';
+
+$stmt = $pdo->query("SELECT * FROM GIFTCARD ORDER BY card_id");
+$giftCards = $stmt->fetchAll();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,36 +29,22 @@
         + Add New Gift Card
     </a>
     <section class="card-grid">
-        <article class="gift-card">
-            <a href="card-details.php">
-                <img src="images/gift-card.png" alt="Amazon Gift Card">
-                <h3>Amazon Gift Card</h3>
-            </a>
-            <p>Points Required: 5,000</p>
-            <a href="card-details.php" class="details-button">
-                View Details
-            </a>
-        </article>
-        <article class="gift-card">
-            <a href="card-details.php">
-                <img src="images/gift-card.png" alt="Starbucks Gift Card">
-                <h3>Starbucks Gift Card</h3>
-            </a>
-            <p>Points Required: 2,500</p>
-            <a href="card-details.php" class="details-button">
-                View Details
-            </a>
-        </article>
-        <article class="gift-card">
-            <a href="card-details.php">
-                <img src="images/gift-card.png" alt="Target Gift Card">
-                <h3>Target Gift Card</h3>
-            </a>
-            <p>Points Required: 4,000</p>
-            <a href="card-details.php" class="details-button">
-                 View Details
-            </a>
-        </article>
+    
+<?php foreach ($giftCards as $card): ?>
+    <article class="gift-card">
+        <a href="card-details.php?id=<?= (int)$card['card_id'] ?>">
+            <img src="images/gift-card.png" alt="Gift Card">
+            <h3><?= htmlspecialchars($card['card_name']) ?> Gift Card</h3>
+        </a>
+
+        <p>Points Required: <?= number_format($card['points_required']) ?></p>
+
+        <a href="card-details.php?id=<?= (int)$card['card_id'] ?>" class="details-button">
+            View Details
+        </a>
+    </article>
+<?php endforeach; ?>
+
     </section>
 </main>
 <footer>
