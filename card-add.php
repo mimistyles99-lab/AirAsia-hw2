@@ -1,3 +1,43 @@
+
+<?php
+require_once __DIR__ . '/includes/db.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = trim($_POST['card-name'] ?? '');
+    $type = $_POST['card-type'] ?? '';
+    $value = $_POST['card-value'] ?? '';
+    $points = $_POST['points'] ?? '';
+
+    if (
+        $name === '' ||
+        !in_array($type, ['Digital', 'Physical'], true) ||
+        !is_numeric($value) ||
+        (float)$value < 1 ||
+        !filter_var($points, FILTER_VALIDATE_INT) ||
+        (int)$points < 1
+    ) {
+        http_response_code(400);
+        exit('Invalid gift card information.');
+    }
+
+    $stmt = $pdo->prepare(
+        "INSERT INTO GIFTCARD
+        (card_name, card_type, card_value, points_required)
+        VALUES (?, ?, ?, ?)"
+    );
+
+    $stmt->execute([
+        $name,
+        $type,
+        $value,
+        (int)$points
+    ]);
+
+    header('Location: card-list.php');
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,7 +59,7 @@
     <h2>Add New Gift Card</h2>
     <p>Enter the information below to add a new gift card.</p>
     <section class="form-container">
-        <form action="card-list.php" method="get">
+        <form action="card-add.php" method="post">
             <label for="card-name">Card Name</label>
             <input
                 type="text"
