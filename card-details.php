@@ -1,3 +1,24 @@
+
+
+<?php
+require_once __DIR__ . '/includes/db.php';
+
+$cardId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+
+if (!$cardId || $cardId < 1) {
+    http_response_code(400);
+    exit('Invalid gift card ID.');
+}
+
+$stmt = $pdo->prepare("SELECT * FROM GIFTCARD WHERE card_id = ?");
+$stmt->execute([$cardId]);
+$card = $stmt->fetch();
+
+if (!$card) {
+    http_response_code(404);
+    exit('Gift card not found.');
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,14 +40,27 @@
     <h2>Gift Card Details</h2>
     <p>View gift card information and manage your rewards.</p>
     <section class="gift-card-details">
-        <img src="images/gift-card.png"
-             alt="Amazon Gift Card">
-        <div class="card-information">
-            <h3>Amazon Gift Card</h3>
-            <p><strong>Card Type:</strong> Digital Gift Card</p>
-            <p><strong>Card Value:</strong> $50.00</p>
-            <p><strong>Points Required:</strong> 5,000</p>
-            <a href="card-update.php" class="add-button">
+        
+<img src="images/gift-card.png"
+     alt="<?= htmlspecialchars($card['card_name']) ?> Gift Card">
+
+<div class="card-information">
+    <h3><?= htmlspecialchars($card['card_name']) ?> Gift Card</h3>
+
+    <p><strong>Card Type:</strong>
+        <?= htmlspecialchars($card['card_type']) ?>
+    </p>
+
+    <p><strong>Card Value:</strong>
+        $<?= number_format($card['card_value'], 2) ?>
+    </p>
+
+    <p><strong>Points Required:</strong>
+        <?= number_format($card['points_required']) ?>
+    </p>
+
+    <a href="card-update.php?id=<?= (int)$card['card_id'] ?>" class="add-button">
+
                 Update Gift Card
             </a>
             <a href="card-list.php" class="details-button">
